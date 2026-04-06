@@ -2,17 +2,17 @@
 
 import { motion } from "framer-motion";
 import { projects } from "@/src/data/projects";
-import type { Variants } from "framer-motion";
+import type { MotionProps } from "framer-motion";
 
-const container: Variants = {
+const container = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
     transition: { staggerChildren: 0.12 },
   },
-};
+} satisfies MotionProps["variants"];
 
-const item: Variants = {
+const item = {
   hidden: { opacity: 0, y: 30 },
   show: {
     opacity: 1,
@@ -22,7 +22,7 @@ const item: Variants = {
       ease: "easeOut",
     },
   },
-};
+} satisfies MotionProps["variants"];
 
 export default function Projects() {
   return (

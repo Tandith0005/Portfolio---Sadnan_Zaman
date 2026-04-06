@@ -105,7 +105,9 @@ export default function Navbar() {
 
           {/* Mobile CV */}
           <Link
-            href="/cv.pdf"
+            href="/Sadnan_FullStack_Developer_CV.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={handleLinkClick}
             className="mt-2 text-sm px-4 py-2 rounded-lg border border-emerald-800 text-emerald-300 text-center hover:bg-emerald-900/30 transition-all duration-300"
           >

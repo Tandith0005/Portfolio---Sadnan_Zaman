@@ -1,7 +1,8 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { projects } from "@/src/data/projects";
-import { motion, Variants } from "framer-motion";
+import type { Variants } from "framer-motion";
 
 const container: Variants = {
   hidden: { opacity: 0 },
@@ -18,6 +19,7 @@ const item: Variants = {
     y: 0,
     transition: {
       duration: 0.6,
+      ease: "easeOut",
     },
   },
 };

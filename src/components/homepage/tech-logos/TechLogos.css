@@ -1,0 +1,57 @@
+.tech-section {
+  position: relative;
+  padding: 80px 0;
+  overflow: hidden;
+}
+
+.tech-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 10;
+}
+
+.tech-title {
+  color: #6ee7b7;
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 30px;
+}
+
+/* Glow Base */
+.tech-glow {
+  position: absolute;
+  width: 400px;
+  height: 200px;
+  background: rgba(16, 185, 129, 0.15);
+  filter: blur(120px);
+  border-radius: 999px;
+  z-index: 1;
+}
+
+/* Left glow */
+.tech-glow-left {
+  top: -50px;
+  left: -100px;
+}
+
+/* Right glow */
+.tech-glow-right {
+  top: -50px;
+  right: -100px;
+}
+
+/* Logo color styling */
+.logoloop__node {
+  color: #6ee7b7;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.logoloop__item:hover .logoloop__node {
+  opacity: 1;
+  transform: scale(1.2);
+  color: #34d399;
+}

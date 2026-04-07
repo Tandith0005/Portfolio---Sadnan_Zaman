@@ -159,7 +159,7 @@ export default function Hero() {
           {/* Image */}
           <div className="relative w-[260px] h-[260px] sm:w-[320px] sm:h-[320px] md:w-[380px] md:h-[380px] z-10 flex items-center justify-center cursor-pointer group">
             <Image
-              src="/person.png"
+              src="/me.png"
               alt="Sadnan Zaman"
               width={450}
               height={450}

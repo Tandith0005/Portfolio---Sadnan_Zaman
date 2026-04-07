@@ -1,120 +1,184 @@
 "use client";
 
-import { navLinks } from "@/src/data/navLinks";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import Image from "next/image";
+import { navLinks } from "@/src/data/navLinks";
+import {
+  HiOutlineHome,
+  HiOutlineUser,
+  HiOutlineFolderOpen,
+  HiOutlineMail,
+  HiOutlineMenu,
+  HiOutlineX,
+} from "react-icons/hi";
+import { gsap } from "gsap";
+
+const iconMap: Record<string, React.ReactNode> = {
+  Home: <HiOutlineHome className="w-6 h-6" />,
+  About: <HiOutlineUser className="w-6 h-6" />,
+  Projects: <HiOutlineFolderOpen className="w-6 h-6" />,
+  Contact: <HiOutlineMail className="w-6 h-6" />,
+};
 
 export default function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
+  const blobRef = useRef<HTMLDivElement>(null);
 
+  // Initialize visibility logic safely after hydration to avoid mismatch
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
+    // A small timeout ensures this doesn't trigger synchronous cascading render warnings
+    const timer = setTimeout(() => {
+      if (window.innerWidth >= 1024) {
+        setIsVisible(true);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // GSAP Blob Animation for the active item
+  useEffect(() => {
+    if (!blobRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.to(blobRef.current, {
+        borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
+        duration: 4, // slower, subtle feel
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+      });
+
+      gsap.to(blobRef.current, {
+        rotation: 360,
+        duration: 30, // slow rotation
+        ease: "none",
+        repeat: -1,
+        transformOrigin: "center",
+      });
+    }, blobRef);
+
+    return () => ctx.revert();
+  }, [activeSection, isVisible]);
+
+  // Active section scroll tracking
+  useEffect(() => {
+    const handleScroll = () => {
+      let current = "home";
+      // Reverse through sections to find the first one that is visible at top of viewport
+      const sections = [...navLinks].reverse();
+
+      for (const { href } of sections) {
+        const id = href.replace("#", "");
+        const element = document.getElementById(id);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          // if top of element is within the top half of screen, consider it active
+          if (rect.top <= window.innerHeight * 0.45) {
+            current = id;
+            break;
+          }
+        }
+      }
+      setActiveSection(current);
+    };
+
+    // Use passive listener for better scroll performance
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Trigger immediately to set initial state
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleLinkClick = () => setMenuOpen(false);
-
   return (
-    <nav
-      className={`fixed w-full top-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-black/90 backdrop-blur-md border-b border-emerald-900/40 shadow-lg"
-          : "bg-transparent"
-      }`}
-    >
-      <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+    <>
+      {/* Floating Toggle Button (Visible when navbar is hidden) */}
+      <button
+        onClick={() => setIsVisible(true)}
+        className={`fixed left-1 top-[27%] -translate-y-1/2 z-40 p-3 rounded-full bg-black/60 border border-emerald-900/50 text-emerald-400 hover:bg-emerald-900/40 hover:scale-110 backdrop-blur-md transition-all duration-300 shadow-lg shadow-black/50 ${
+          isVisible
+            ? "opacity-0 pointer-events-none scale-50"
+            : "opacity-100 scale-100"
+        }`}
+        aria-label="Open Navigation"
+      >
+        <HiOutlineMenu className="w-5 h-5" />
+      </button>
+
+      {/* Main Vertical Navbar */}
+      <nav
+        className={`fixed left-0 top-1/2 -translate-y-1/2 w-20 bg-black/80 backdrop-blur-xl border-y border-r border-emerald-900/40 rounded-r-3xl z-50 flex flex-col items-center py-8 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-2xl shadow-emerald-900/20 ${
+          isVisible ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Close Button */}
+        <button
+          onClick={() => setIsVisible(false)}
+          className="absolute -right-1 -top-3 p-1.5 bg-black border border-emerald-500/30 rounded-full text-gray-400 hover:text-emerald-300 hover:scale-110 hover:bg-emerald-900/80 transition-all z-10"
+          aria-label="Close Navigation"
+        >
+          <HiOutlineX className="w-4 h-4" />
+        </button>
+
         {/* Logo */}
         <Link
           href="/#home"
-          className="text-xl md:text-2xl font-bold tracking-tight flex items-center"
+          onClick={() => window.innerWidth < 1024 && setIsVisible(false)}
+          className="mb-8 group flex items-center justify-center relative w-10 h-10"
         >
-          <span className="text-emerald-400 mr-1">&lt;</span>
-          Tandith
-          <span className="text-emerald-600 ml-1">/&gt;</span>
+          <Image
+            src="/logo.png"
+            alt="Tandith Logo"
+            fill
+            className="object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+            sizes="40px"
+          />
         </Link>
 
-        {/* Desktop Links */}
-        <div className="hidden md:flex gap-8 text-sm text-gray-400">
-          {navLinks.map(({ label, href }) => (
-            <Link
-              key={href}
-              href={href}
-              className="relative group hover:text-emerald-300 transition-colors duration-200"
-            >
-              {label}
-              <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-emerald-500 transition-all duration-300 group-hover:w-full" />
-            </Link>
-          ))}
+        {/* Divider */}
+        <div className="w-8 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent mb-6" />
+
+        {/* Links */}
+        <div className="flex flex-col gap-4 w-full items-center relative flex-1">
+          {navLinks.map(({ label, href }) => {
+            const id = href.replace("#", "");
+            const isActive = activeSection === id;
+
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => window.innerWidth < 1024 && setIsVisible(false)}
+                className={`group relative flex flex-col items-center justify-center p-1.5 w-14 h-14 transition-all duration-300 rounded-full z-10 ${
+                  isActive
+                    ? "text-emerald-50"
+                    : "text-gray-400 hover:text-emerald-300 hover:scale-105"
+                }`}
+              >
+                {/* Active Blob Background */}
+                {isActive && (
+                  <div
+                    ref={blobRef}
+                    className="absolute inset-[6px] bg-gradient-to-tr from-emerald-600/40 to-teal-400/20 shadow-[0_0_12px_rgba(16,185,129,0.2)] backdrop-blur-sm -z-10"
+                    style={{
+                      borderRadius: "40% 60% 70% 30% / 40% 50% 60% 50%",
+                    }}
+                  />
+                )}
+
+                <div className="relative z-10 flex flex-col items-center gap-1 transition-transform duration-300">
+                  {iconMap[label] || <HiOutlineHome className="w-5 h-5" />}
+                  <span
+                    className={`text-[10px] tracking-wider font-medium transition-opacity duration-300 ${isActive ? "opacity-100" : "opacity-70 group-hover:opacity-100"}`}
+                  >
+                    {label}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
-
-        {/* Download CV */}
-        <div className="hidden md:block">
-          <a
-            href="/Sadnan_FullStack_Developer_CV.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-sm px-4 py-2 rounded-lg border border-emerald-800 text-emerald-300 hover:bg-emerald-900/30 transition-all duration-300"
-          >
-            Download CV
-          </a>
-        </div>
-
-        {/* Mobile Hamburger */}
-        <button
-          onClick={() => setMenuOpen((prev) => !prev)}
-          className="md:hidden flex flex-col gap-1.5 p-1"
-          aria-label="Toggle menu"
-        >
-          <span
-            className={`block h-px w-6 bg-emerald-300 transition-all duration-300 ${
-              menuOpen ? "rotate-45 translate-y-2" : ""
-            }`}
-          />
-          <span
-            className={`block h-px w-6 bg-emerald-300 transition-all duration-300 ${
-              menuOpen ? "opacity-0" : ""
-            }`}
-          />
-          <span
-            className={`block h-px w-6 bg-emerald-300 transition-all duration-300 ${
-              menuOpen ? "-rotate-45 -translate-y-2" : ""
-            }`}
-          />
-        </button>
-      </div>
-
-      {/* Mobile Dropdown */}
-      <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          menuOpen ? "max-h-80 opacity-100" : "max-h-0 opacity-0"
-        } bg-black/95 border-b border-emerald-900/40`}
-      >
-        <div className="flex flex-col px-4 pb-4 pt-2 gap-4">
-          {navLinks.map(({ label, href }) => (
-            <Link
-              key={href}
-              href={href}
-              onClick={handleLinkClick}
-              className="text-gray-400 hover:text-emerald-300 transition-colors duration-200 text-sm py-1 border-b border-gray-800/50"
-            >
-              {label}
-            </Link>
-          ))}
-
-          {/* Mobile CV */}
-          <Link
-            href="/Sadnan_FullStack_Developer_CV.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleLinkClick}
-            className="mt-2 text-sm px-4 py-2 rounded-lg border border-emerald-800 text-emerald-300 text-center hover:bg-emerald-900/30 transition-all duration-300"
-          >
-            Download CV
-          </Link>
-        </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 }

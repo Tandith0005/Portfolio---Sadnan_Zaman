@@ -127,7 +127,7 @@ export default function Navbar() {
           className="mb-8 group flex items-center justify-center relative w-10 h-10"
         >
           <Image
-            src="/logo.png"
+            src="/Logo.png"
             alt="Tandith Logo"
             fill
             className="object-contain transition-transform duration-300 group-hover:scale-110 drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]"
